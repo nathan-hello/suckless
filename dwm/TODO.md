@@ -1,0 +1,3 @@
+- investigate taggrid. does it keep same tags for multiple monitors?
+- is polybar worth? https://github.com/mihirlad55/polybar-dwm-module?tab=readme-ov-file
+- get media keys to work https://dwm.suckless.org/patches/mpdcontrol/
