@@ -153,6 +153,7 @@ static const Rule rules[] = {
         /* class                instance  title      wintype           tags mask  isfloating  isterminal  noswallow  monitor */
         { "st",                 NULL,     NULL,      NULL,             0,         0,          1,           0,        -1 },
         { "xlogger-browser",    NULL,     NULL,      NULL,             0,         1,          0,           1,        -1 },
+        { "rayleigh",           NULL,     NULL,      NULL,             0,         1,          0,           1,        -1 },
 
 };
 
@@ -221,7 +222,8 @@ static const char *boomer[]       = { "boomer", NULL};
 static const Key keys[] = {
        /* modifier                     key            function                argument */
        { METAKEY,                       XK_Return,     spawn,                  {.v = termcmd } },
-       { METAKEY,                       XK_Return,     zoom,                   {0} },
+       { METAKEY|ShiftMask,             XK_Return,     zoom,                   {0} },
+
        { METAKEY,                       XK_Tab,        view,                   {0} },
 
        { METAKEY,                       XK_w,          spawn,                  {.v = browser } },
