@@ -273,7 +273,18 @@ static Shortcut shortcuts[] = {
  * If you want keys other than the X11 function keys (0xFD00 - 0xFFFF)
  * to be mapped below, add them to this array.
  */
-static KeySym mappedkeys[] = { -1 };
+static KeySym mappedkeys[] = {
+  XK_1,
+  XK_2,
+  XK_3,
+  XK_4,
+  XK_5,
+  XK_6,
+  XK_7,
+  XK_8,
+  XK_9,
+  -1 
+};
 
 /*
  * State bits to ignore when matching key or button events.  By default,
@@ -342,6 +353,15 @@ static Key key[] = {
 	{ XK_KP_7,          XK_ANY_MOD,     "\033Ow",       +2,    0},
 	{ XK_KP_8,          XK_ANY_MOD,     "\033Ox",       +2,    0},
 	{ XK_KP_9,          XK_ANY_MOD,     "\033Oy",       +2,    0},
+        { XK_1,             ControlMask,    "\033[49;5u",    0,    0},
+        { XK_2,             ControlMask,    "\033[50;5u",    0,    0},
+        { XK_3,             ControlMask,    "\033[51;5u",    0,    0},
+        { XK_4,             ControlMask,    "\033[52;5u",    0,    0},
+        { XK_5,             ControlMask,    "\033[53;5u",    0,    0},
+        { XK_6,             ControlMask,    "\033[54;5u",    0,    0},
+        { XK_7,             ControlMask,    "\033[55;5u",    0,    0},
+        { XK_8,             ControlMask,    "\033[56;5u",    0,    0},
+        { XK_9,             ControlMask,    "\033[57;5u",    0,    0},
 	{ XK_Up,            ShiftMask,      "\033[1;2A",     0,    0},
 	{ XK_Up,            Mod1Mask,       "\033[1;3A",     0,    0},
 	{ XK_Up,         ShiftMask|Mod1Mask,"\033[1;4A",     0,    0},
