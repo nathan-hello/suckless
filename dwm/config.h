@@ -152,6 +152,7 @@ static const Rule rules[] = {
        RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
         /* class                instance  title      wintype           tags mask  isfloating  isterminal  noswallow  monitor */
         { "st",                 NULL,     NULL,      NULL,             0,         0,          1,           0,        -1 },
+        { "warwick",            NULL,     NULL,      NULL,             0,         0,          0,           1,        -1 },
         { "xlogger-browser",    NULL,     NULL,      NULL,             0,         1,          0,           1,        -1 },
         { "rayleigh",           NULL,     NULL,      NULL,             0,         1,          0,           1,        -1 },
 
@@ -226,15 +227,16 @@ static const Key keys[] = {
 
        { METAKEY,                       XK_Tab,        view,                   {0} },
 
+       { METAKEY,                       XK_q,          zoom,                   {0} },
        { METAKEY,                       XK_w,          spawn,                  {.v = browser } },
        { METAKEY,                       XK_e,          spawn,                  {.v = termcmd } },
-    // { METAKEY,                       XK_r,          spawn,                  {.v = termcmd } },
+       { METAKEY,                       XK_r,          zoom,                   {0} },
     
        
-    // { METAKEY,                       XK_a,          spawn,                  {.v = dmenucmd } },
-    // { METAKEY,                       XK_s,          spawn,                  {.v = dmenucmd } },
+       { METAKEY,                       XK_a,          zoom,                   {0} },
+       { METAKEY,                       XK_s,          zoom,                   {0} },
        { METAKEY,                       XK_d,          spawn,                  {.v = xlogger } },
-    // { METAKEY,                       XK_f,          spawn,                  {.v = dmenucmd } },
+       { METAKEY,                       XK_f,          zoom,                   {0} },
        { METAKEY,                       XK_g,          spawn,                  {.v = dmenucmd } },
 
        { METAKEY,                       XK_b,          spawn,                  {.v = boomer } },
@@ -255,9 +257,10 @@ static const Key keys[] = {
        { METAKEY|ShiftMask,                    XK_k,          movestack,              {.i = -1 } },
     // { METAKEY|ShiftMask,                    XK_l,          movestack,              {.i = +1 } },
     
-       { METAKEY|ShiftMask,                    XK_q,          killclient,             {0} },
-       { METAKEY|ControlMask|ShiftMask,        XK_q,          quit,                   {0} },
-       { METAKEY|ALTKEY|ControlMask|ShiftMask, XK_q,          quit,                   {1} },
+       { METAKEY,                              XK_n,          killclient,             {0} },
+       { METAKEY|ShiftMask,                    XK_n,          quit,                   {0} },
+    // quit(1) = Restart DWM in place without killing any clients. 
+       { METAKEY|ShiftMask|ControlMask,        XK_q,          quit,                   {1} },
 
        { METAKEY,                              XK_c,          focusmon,               {.i = +1 } },
        { METAKEY,                              XK_z,          focusmon,               {.i = -1 } },
