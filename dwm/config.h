@@ -29,8 +29,8 @@ static int tagindicatortype              = INDICATOR_TOP_LEFT_SQUARE;
 static int tiledindicatortype            = INDICATOR_NONE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_SQUARE;
 static const int quit_empty_window_count = 0;   /* only allow dwm to quit if no (<= count) windows are open */
-static const char *fonts[]               = { "GeistMono Nerd Font:style=Regular:size=11" };
-static const char dmenufont[]            = "GeistMono Nerd Font:style=Regular:size=16";
+static const char *fonts[]               = { "monospace:style=Regular:size=12" };
+static const char dmenufont[]            = "monospace:style=Bold:size=16";
 
 static char c000000[]                    = "#000000"; // placeholder value
 
@@ -214,7 +214,7 @@ static const char *dmenucmd[] = {
     NULL
 };
 static const char *termcmd[]      = { "st", NULL };
-static const char *browser[]      = { "qutebrowser", NULL };
+static const char *browser[]      = { "helium", NULL };
 static const char *xlogger[]      = { "xlogger-browser", NULL};
 static const char *screenshot[]   = { "flameshot", "gui", NULL};
 static const char *boomer[]       = { "boomer", NULL};

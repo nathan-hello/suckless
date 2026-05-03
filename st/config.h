@@ -5,13 +5,13 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "GeistMono Nerd Font:pixelsize=24:antialias=true:autohint=true";
+static char *font = "monospace:pixelsize=24:antialias=true:autohint=true";
 
 static int borderpx = 2;
 
 /* modkey options: ControlMask, ShiftMask or XK_ANY_MOD */
 static uint url_opener_modkey = XK_ANY_MOD;
-static char *url_opener = "qutebrowser";
+static char *url_opener = "helium";
 
 /*
  * What program is execed by st depends of these precedence rules:
