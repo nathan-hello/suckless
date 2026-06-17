@@ -240,7 +240,7 @@ static char *
 format_power_uw(char *buf, size_t len, long long power_uw)
 {
     if (power_uw < 0) {
-        snprintf(buf, len, "---w");
+        snprintf(buf, len, " --w");
         return buf;
     }
 

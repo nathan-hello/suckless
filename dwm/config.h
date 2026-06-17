@@ -405,5 +405,6 @@ static IPCCommand ipccommands[] = {
     IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
     IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
     IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
+    IPCCOMMAND( setcolor, 1, {ARG_TYPE_STR} ),
     IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ),
 };

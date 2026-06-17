@@ -58,14 +58,21 @@ load_xresources()
 }
 
 void
+reload_colors(void)
+{
+	int i;
+
+	for (i = 0; i < LENGTH(colors); i++) {
+		free(scheme[i]);
+		scheme[i] = drw_scm_create(drw, colors[i], ColCount);
+	}
+	arrange(NULL);
+	focus(NULL);
+}
+
+void
 xrdb(const Arg *arg)
 {
 	load_xresources();
-	int i;
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i],
-		ColCount
-		);
-	arrange(NULL);
-	focus(NULL);
+	reload_colors();
 }

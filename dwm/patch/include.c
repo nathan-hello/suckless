@@ -14,6 +14,7 @@
 #include "focusmaster.c"
 #include "games.c"
 #include "ipc.c"
+#include "setcolor.c"
 #ifdef VERSION
 #include "ipc/IPCClient.c"
 #include "ipc/yajl_dumps.c"
@@ -30,4 +31,3 @@
 #include "layout_facts.c"
 #include "layout_monocle.c"
 #include "layout_tile.c"
-

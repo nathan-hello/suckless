@@ -18,6 +18,7 @@
 #include "ipc/ipc.h"
 #include "ipc/util.h"
 #include "movestack.h"
+#include "setcolor.h"
 #include "restartsig.h"
 #include "swallow.h"
 #include "vanitygaps.h"
@@ -25,4 +26,3 @@
 /* Layouts */
 #include "layout_monocle.h"
 #include "layout_tile.h"
-
