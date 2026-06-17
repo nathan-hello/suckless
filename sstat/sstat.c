@@ -1,6 +1,7 @@
 #include <alsa/asoundlib.h>
 #include <curl/curl.h>
 #include <err.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
 #include <limits.h>
@@ -29,6 +30,8 @@ static char *battery_perc(const char *bat);
 static char *battery_perc_smapi(const char *bat);
 static char *battery_state(const char *bat);
 static char *battery_time(const char *bat);
+static char *battery_upcharge(const char *bat);
+static char *battery_downcharge(const char *bat);
 static char *battery_state_smapi(const char *bat);
 static char *battery_time_smapi(const char *bat);
 static char *cpu_freq(void);
@@ -95,6 +98,157 @@ static  char pulse_profile_str[80] = UNKNOWN_STR;
     static char ret_str[len];\
     sprintf(ret_str, format, ##__VA_ARGS__);\
     return ret_str;
+
+static int
+read_sysfs_text(const char *path, char *buf, size_t len)
+{
+    FILE *fp;
+
+    fp = fopen(path, "r");
+    if (fp == NULL) {
+        return 0;
+    }
+
+    if (fgets(buf, len, fp) == NULL) {
+        fclose(fp);
+        return 0;
+    }
+    fclose(fp);
+
+    buf[strcspn(buf, "\n")] = '\0';
+    return 1;
+}
+
+static int
+read_sysfs_ll(const char *path, long long *value)
+{
+    FILE *fp;
+
+    fp = fopen(path, "r");
+    if (fp == NULL) {
+        return 0;
+    }
+
+    if (fscanf(fp, "%lld", value) != 1) {
+        fclose(fp);
+        return 0;
+    }
+    fclose(fp);
+    return 1;
+}
+
+static long long
+battery_power_uw(const char *bat)
+{
+    char path[128];
+    long long power = -1;
+    long long current_ma;
+    long long voltage_mv;
+    long long current;
+    long long voltage;
+
+    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/hwmon1/curr1_input", bat);
+    if (read_sysfs_ll(path, &current_ma)) {
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/hwmon1/in0_input", bat);
+        if (read_sysfs_ll(path, &voltage_mv)) {
+            return current_ma * voltage_mv;
+        }
+    }
+
+    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/power_now", bat);
+    if (read_sysfs_ll(path, &power)) {
+        return power;
+    }
+
+    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/current_now", bat);
+    if (!read_sysfs_ll(path, &current)) {
+        return -1;
+    }
+
+    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/voltage_now", bat);
+    if (!read_sysfs_ll(path, &voltage)) {
+        return -1;
+    }
+
+    return (current * voltage) / 1000000LL;
+}
+
+static long long
+charger_power_uw(const char *bat)
+{
+    struct dirent *ent;
+    DIR *dir;
+    char path[PATH_MAX];
+    char type[32];
+    long long online;
+    long long power;
+
+    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/status", bat);
+    if (!read_sysfs_text(path, type, sizeof(type)) || strcmp(type, "Charging") != 0) {
+        return -1;
+    }
+
+    dir = opendir("/sys/class/power_supply");
+    if (dir == NULL) {
+        return -1;
+    }
+
+    while ((ent = readdir(dir)) != NULL) {
+        if (ent->d_name[0] == '.') {
+            continue;
+        }
+        if (!strcmp(ent->d_name, bat)) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/type", ent->d_name);
+        if (!read_sysfs_text(path, type, sizeof(type))) {
+            continue;
+        }
+        if (strcmp(type, "Battery") == 0) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/online", ent->d_name);
+        if (!read_sysfs_ll(path, &online) || online <= 0) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/power_now", ent->d_name);
+        if (read_sysfs_ll(path, &power)) {
+            closedir(dir);
+            return power;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/current_now", ent->d_name);
+        if (!read_sysfs_ll(path, &power)) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/voltage_now", ent->d_name);
+        if (!read_sysfs_ll(path, &online)) {
+            continue;
+        }
+
+        closedir(dir);
+        return (power * online) / 1000000LL;
+    }
+
+    closedir(dir);
+    return -1;
+}
+
+static char *
+format_power_uw(char *buf, size_t len, long long power_uw)
+{
+    if (power_uw < 0) {
+        snprintf(buf, len, "---w");
+        return buf;
+    }
+
+    snprintf(buf, len, "%3lldw", (power_uw + 500000LL) / 1000000LL);
+    return buf;
+}
 
 int weatherInit = 1;
 char* weatherTemp;
@@ -175,7 +329,7 @@ battery_time(const char *bat)
     fscanf(fp, "%15s", status);
     fclose(fp);
 
-    if (strcmp(status, "Full") == 0) return "00:00";
+    if (strcmp(status, "Full") == 0) return "=00:00";
 
     // 2. Get Charge and Current
     snprintf(path, sizeof(path), "/sys/class/power_supply/%s/charge_now", bat);
@@ -206,7 +360,23 @@ battery_time(const char *bat)
         return UNKNOWN_STR;
     }
 
-    RETURN_FORMAT(20, "%02d:%02d", time_mins / 60, time_mins % 60);
+    RETURN_FORMAT(20, "%c%02d:%02d", strcmp(status, "Charging") == 0 ? '+' : '-', time_mins / 60, time_mins % 60);
+}
+
+static char *
+battery_upcharge(const char *bat)
+{
+    static char ret_str[16];
+
+    return format_power_uw(ret_str, sizeof(ret_str), charger_power_uw(bat));
+}
+
+static char *
+battery_downcharge(const char *bat)
+{
+    static char ret_str[16];
+
+    return format_power_uw(ret_str, sizeof(ret_str), battery_power_uw(bat));
 }
 
 static char *

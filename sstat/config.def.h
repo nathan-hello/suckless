@@ -23,6 +23,8 @@
 - battery_state [argument: battery name]        : battery charging state
 - battery_state_smapi [argument: battery name]  : battery charging state, uses smapi 
 - battery_time_smapi [argument: battery name]   : time till full/empty, uses smapi 
+- battery_upcharge [argument: battery name]     : charger power in watts
+- battery_downcharge [argument: battery name]   : battery flow power in watts
 - cpu_freq [argument: none]                     : cpu frequency in MHz 
 - cpu_perc [argument: none]                     : cpu usage in percent 
 - datetime [argument: format]                   : date/time (for help 'man strftime')
@@ -63,10 +65,10 @@
 - wifi_essid [argument: wifi card interface]    : wifi essid 
 - wifi_perc [argument: none]                    : wifi signal in percent */
 
-#define STATUS_FORMAT "%s | %s[%s] | %s [%s : %s] | %s@%s | %s/%s MB | %s/%s GB [%s] | %s"
+#define STATUS_FORMAT "%s | %s (%s) <%s/ %s> | %s [%s : %s] | %s@%s | %s/%s MB | %s/%s GB [%s] | %s"
 #define STATUS_CONTENT \
     vol_perc_alsa("hw:Generic_1"),                  /* volume */\
-    battery_perc("BAT1"), battery_state("BAT1"), \
+    battery_perc("BAT1"), battery_time("BAT1"), battery_upcharge("BAT1"), battery_downcharge("BAT1"), \
     ip("eno1"),\
     net_up("eno1"),\
     net_down("eno1"),\
