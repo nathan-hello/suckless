@@ -17,6 +17,10 @@
 #define LAT ""
 #define LON ""
 
+/* battery sysfs paths */
+#define BATTERY_CURRENT_NOW_PATH "/sys/class/power_supply/BAT1/hwmon1/curr1_input"
+#define BATTERY_VOLTAGE_NOW_PATH "/sys/class/power_supply/BAT1/hwmon1/in0_input"
+
 /* available functions
 - battery_perc [argument: battery name]         : battery percentage
 - battery_perc_smapi [argument: battery name]   : battery percentage, uses smapi 

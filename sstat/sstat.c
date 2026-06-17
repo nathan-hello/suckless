@@ -138,7 +138,7 @@ read_sysfs_ll(const char *path, long long *value)
 }
 
 static long long
-battery_power_uw(const char *bat)
+battery_power_uw(const char *bat, const char *current_path, const char *voltage_path)
 {
     char path[128];
     long long power = -1;
@@ -147,10 +147,8 @@ battery_power_uw(const char *bat)
     long long current;
     long long voltage;
 
-    snprintf(path, sizeof(path), "/sys/class/power_supply/%s/hwmon1/curr1_input", bat);
-    if (read_sysfs_ll(path, &current_ma)) {
-        snprintf(path, sizeof(path), "/sys/class/power_supply/%s/hwmon1/in0_input", bat);
-        if (read_sysfs_ll(path, &voltage_mv)) {
+    if (read_sysfs_ll(current_path, &current_ma)) {
+        if (read_sysfs_ll(voltage_path, &voltage_mv)) {
             return current_ma * voltage_mv;
         }
     }
@@ -376,7 +374,7 @@ battery_downcharge(const char *bat)
 {
     static char ret_str[16];
 
-    return format_power_uw(ret_str, sizeof(ret_str), battery_power_uw(bat));
+    return format_power_uw(ret_str, sizeof(ret_str), battery_power_uw(bat, BATTERY_CURRENT_NOW_PATH, BATTERY_VOLTAGE_NOW_PATH));
 }
 
 static char *
