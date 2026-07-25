@@ -119,6 +119,47 @@ read_sysfs_text(const char *path, char *buf, size_t len)
     return 1;
 }
 
+static FILE *
+open_hwmon_fallback(const char *path)
+{
+    DIR *dir;
+    struct dirent *de;
+    FILE *fp;
+    char fallback[PATH_MAX];
+    const char *base;
+
+    fp = fopen(path, "r");
+    if (fp != NULL || strncmp(path, "/sys/class/hwmon/", 17) != 0) {
+        return fp;
+    }
+
+    base = strrchr(path, '/');
+    if (base == NULL || base[1] == '\0') {
+        return NULL;
+    }
+    base++;
+
+    dir = opendir("/sys/class/hwmon");
+    if (dir == NULL) {
+        return NULL;
+    }
+
+    while ((de = readdir(dir)) != NULL) {
+        if (strncmp(de->d_name, "hwmon", 5) != 0) {
+            continue;
+        }
+
+        snprintf(fallback, sizeof(fallback), "/sys/class/hwmon/%s/%s", de->d_name, base);
+        fp = fopen(fallback, "r");
+        if (fp != NULL) {
+            break;
+        }
+    }
+
+    closedir(dir);
+    return fp;
+}
+
 static int
 read_sysfs_ll(const char *path, long long *value)
 {
@@ -504,13 +545,36 @@ fan_framework(void)
 {
     int fan1 = 0, fan2 = 0;
     FILE *fp1, *fp2;
+    DIR *dir;
+    struct dirent *de;
+    char path[PATH_MAX];
 
-    // Framework 16 has two fans.
-    fp1 = fopen("/sys/class/hwmon/hwmon11/fan1_input", "r");
-    fp2 = fopen("/sys/class/hwmon/hwmon11/fan2_input", "r");
+    dir = opendir("/sys/class/hwmon");
+    if (dir == NULL) {
+        warn("Failed to open file /sys/class/hwmon");
+        return UNKNOWN_STR;
+    }
+
+    fp1 = NULL;
+    fp2 = NULL;
+    while ((de = readdir(dir)) != NULL) {
+        if (strncmp(de->d_name, "hwmon", 5) != 0) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/hwmon/%s/fan1_input", de->d_name);
+        fp1 = fopen(path, "r");
+        if (fp1 == NULL) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "/sys/class/hwmon/%s/fan2_input", de->d_name);
+        fp2 = fopen(path, "r");
+        break;
+    }
+    closedir(dir);
 
     if (fp1 == NULL) {
-        warn("Failed to open fan1_input");
         return UNKNOWN_STR;
     }
 
@@ -975,7 +1039,7 @@ temp(const char *file)
     int temp;
     FILE *fp;
 
-    fp = fopen(file, "r");
+    fp = open_hwmon_fallback(file);
     if (fp == NULL) {
         warn("Failed to open file %s", file);
         RETURN_FORMAT(10, UNKNOWN_STR);
